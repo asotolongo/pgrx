@@ -1,30 +1,30 @@
-##pgrx
+pgrx
 -------------------------
 
 pgrx is an app to generate reports in markdown format about some recommendations and can obteain general descriptions from  Postgres database, this app uses some mix queries from the postgres catalog that can help to detect some possible problem and anomalies related to database performance, design and security.
 
 
 
-##Requirements and Usage
+Requirements and Usage
 -------------------------
 
-###Requirements
+**Requirements**
 
 * App and lib:
-   1-    python 2.x
-   2-    psycopg2
-   2-    Tested whit 10+ (with previous versions can execute but are not yet tested )
+	*  python 2.x
+	* psycopg2
+	* Tested whit 10+ (with previous versions can execute but are not yet tested )
    
 
 
 
 * The following OS are supported:
-  1- Linux (modern RHEL/CentOS or Debian/Ubuntu; others are not yet tested);
+	* Linux (modern RHEL/CentOS or Debian/Ubuntu; others are not yet tested);
 
 
-###Usage
+**Usage**
 
-Example of Use
+**Example of Use**
 
 Download from  https://github.com/asotolongo/pgrx
 
@@ -77,7 +77,7 @@ Information for Describe db in file des_dell_test_2019-12-26_11-10-21.md
 
 ```
 
-####IMPORTANT: 
+**IMPORTANT:** 
 If There're bugs in the existing version or if you have some suggestion please contact to me.  
 
 Anthony R. Sotolongo leon

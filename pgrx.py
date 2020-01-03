@@ -3,7 +3,9 @@ from util.db import databasepg,log
 import util.config as conf
 import os, time, sys,argparse
 from datetime import datetime
+import markdown
 
+print
 
 
 
@@ -102,8 +104,8 @@ class recom(object):
         and not exists (select 1  from information_schema.key_column_usage kcu    where kcu.table_name = tbl.table_name  and kcu.table_schema = tbl.table_schema)""")
 
         if len(dat) > 0:
-            r = "\n\n" + '**Must check the following table without PK** <a name="nopk"></a>'+"\n\n"
-            self.toc.append('    * [Tables without PK](#nopk)')
+            r = "\n\n" + '**Must check the following table without Primary Key** <a name="nopk"></a>'+"\n\n"
+            self.toc.append('    * [tables without Primary Key](#nopk)')
             r = r + "Schena | Table "
             r = r + "\n" + "--- | --- "
             for d in dat:
@@ -123,9 +125,9 @@ class recom(object):
             "  AND c.contype = 'f' GROUP BY c.conrelid, c.conname, c.confrelid ORDER BY pg_catalog.pg_relation_size(c.conrelid) DESC;")
 
         if len(dat) > 0:
-            r = "\n\n" + '**Must check the following FK, probably need an index** <a name="fknoindex"></a>'+"\n\n"
-            self.toc.append('    * [FK without index](#fknoindex)')
-            r = r + "Table | Column  | FK  | Referenced_table "
+            r = "\n\n" + '**Must check the following foreign key, probably need an index** <a name="fknoindex"></a>'+"\n\n"
+            self.toc.append('    * [foreign key without index](#fknoindex)')
+            r = r + "Table | Column  | foreign key  | Referenced_table "
             r = r + "\n" + "--- | --- | --- | --- "
             for d in dat:
 
@@ -393,11 +395,11 @@ class recom(object):
 
         return ""
 
-    def recom_ddl_CompileTime_RunTime_Checks_plpgsql(self):
+    def recom_ddl_compiletime_runtime_checks_plpgsql(self):
 
         dat = self.con.executequery("""SELECT nm.nspname||'.'||proname, pg_get_functiondef(pr.oid)
-                FROM pg_proc pr join  pg_type tp on (tp.oid = pr.prorettype)   left join pg_stat_user_functions pgst on (pr.oid = pgst.funcid) join pg_namespace nm on ( pr.pronamespace = nm.oid)
-                WHERE    pr.proisagg = FALSE       AND pr.pronamespace IN (  SELECT oid    FROM pg_namespace  WHERE nspname NOT LIKE 'pg_%'  AND nspname != 'information_schema'  )""")
+                FROM pg_proc pr join  pg_type tp on (tp.oid = pr.prorettype) join pg_language l  on (pr.prolang=l.oid)  left join pg_stat_user_functions pgst on (pr.oid = pgst.funcid) join pg_namespace nm on ( pr.pronamespace = nm.oid)
+                WHERE  l.lanname='plpgsql'  and pr.pronamespace IN (  SELECT oid    FROM pg_namespace  WHERE nspname NOT LIKE 'pg_%'  AND nspname != 'information_schema'  )""")
         schemas = self.con.executequery("select string_agg(nspname,',') from pg_namespace where nspname not like 'pg_%'  and nspname <>'information_schema';")
         pl = []
         for d in dat:
@@ -448,7 +450,7 @@ class descr(object):
         if len(dat) > 0 :
             r = "\n\n" + '**Server Version** <a name="version"></a>'
             self.toc.append('    * [Version](#version)')
-            r = r + "\n" + "PG server version # : "+str(dat[0][0])
+            r = r + "\n" + "PostgreSQL server version # : "+str(dat[0][0])
             return r + "\n\n"
         return  ""
 
@@ -474,7 +476,7 @@ class descr(object):
         or name = 'autovacuum' or name='autovacuum_analyze_scale_factor'  or name='show autovacuum_vacuum_scale_factor' or name ='autovacuum_max_workers'
         or name = 'autovacuum_naptime' or name='autovacuum_vacuum_cost_delay'  or name='show autovacuum_vacuum_cost_limit' or name ='max_connections' or name ='max_wal_size'""")
         if len(dat) > 0:
-            r = '**Conf Parameters** <a name="conf"></a> ' + "\n\n"
+            r = '**Config Parameters** <a name="conf"></a> ' + "\n\n"
             self.toc.append('    * [Conf Parameters](#conf)')
             r = r + "Parameter | Value "
             r = r + "\n" + "--- | --- "
@@ -506,7 +508,7 @@ class descr(object):
                    (SELECT ns.nspname as schema ,(select count (*)  from pg_tables where schemaname=ns.nspname) as cantidad_tablas,
                     (select count(*) from pg_indexes where schemaname=ns.nspname) as cantidad_indices,
                     (select count (*)  from pg_catalog.pg_views where schemaname NOT IN ('pg_catalog', 'information_schema') and schemaname=ns.nspname) as cantidad_vistas,
-                    (SELECT count(*) FROM pg_proc pr join  pg_type tp on (tp.oid = pr.prorettype)   left join pg_stat_user_functions pgst on (pr.oid  = pgst.funcid) join pg_namespace nm on ( pr.pronamespace= nm.oid) WHERE    pr.proisagg = FALSE       AND pr.pronamespace IN (  SELECT oid    FROM pg_namespace  WHERE nspname NOT LIKE 'pg_%'  AND nspname !='information_schema' AND nspname=ns.nspname) ) as cantidad_funciones,
+                    (SELECT count(*) FROM pg_proc pr join  pg_type tp on (tp.oid = pr.prorettype)   left join pg_stat_user_functions pgst on (pr.oid  = pgst.funcid) join pg_namespace nm on ( pr.pronamespace= nm.oid) WHERE    pr.pronamespace IN (  SELECT oid    FROM pg_namespace  WHERE nspname NOT LIKE 'pg_%'  AND nspname !='information_schema' AND nspname=ns.nspname) ) as cantidad_funciones,
                     (select  count(*) from information_schema.triggers where trigger_schema=ns.nspname) as cantidad_triggers,
                     COALESCE(sum (round((pg_relation_size(psat.relid::regclass)/1024)/1024::numeric,2)::real),0 )as peso_tabla,
                     COALESCE( sum( round((pg_indexes_size(psat.relid::regclass)/1024)/1024::numeric,2)::real),0) AS peso_index
@@ -515,7 +517,7 @@ class descr(object):
                                     left join pg_stat_user_indexes AS idstat ON idstat.relname = psat.relname
                                       group by 1  ORDER BY 2 DESC   )""")
         if len(dat) > 0 :
-            r = '**Dabtase summary objects** <a name="summary"></a> '+"\n\n"
+            r = '**Database summary objects** <a name="summary"></a> '+"\n\n"
             self.toc.append('    * [Summary objects](#summary)')
             r = r +  "Schema | Tables | Indexes | Views | Functions | Triggers | Tables size MB | Indexes Size MB"
             r = r + "\n" + "--- | --- | --- | --- | --- | --- | --- | ---"
@@ -689,6 +691,8 @@ if __name__ == '__main__':
                         help="Port for connect to PostgreSQL (default: "+conf.PORTP+")", default=conf.PORTP)
     parser.add_argument('-P', action='store', dest='passw',
                         help="Password for connect to PostgreSQL", default=conf.PASS)
+    parser.add_argument('-o', action='store', dest='output',
+                        help="Output format report values (md->markdown, html->html), (default: md)", default='md')
 
     parser.add_argument('--version', action='version', version='%(prog)s 0.1')
 
@@ -750,7 +754,20 @@ if __name__ == '__main__':
             fr.close()
             os.remove("des_t2_.txt")
             os.remove("des_t1_.txt")
-            print "Information for Describe db in file " + "des_" + conf.BBDD + "_" + dt_string + ".md"
+            if args.output=='html':
+                html = markdown.markdownFromFile(input="des_" + conf.BBDD + "_" + dt_string + ".md",output="des_" + conf.BBDD + "_" + dt_string + ".html", extensions=['markdown.extensions.tables'])
+                file = open("des_" + conf.BBDD + "_" + dt_string + ".html")
+                contents = file.read()
+                file.close()
+                replaced_contents = contents.replace('<table>', '<table border=1>')
+                os.remove("des_" + conf.BBDD + "_" + dt_string + ".html")
+                file = open("des_" + conf.BBDD + "_" + dt_string + ".html","w+")
+                file.write(replaced_contents)
+                file.close()
+                print "Information for Describe db in file " + "des_" + conf.BBDD + "_" + dt_string + ".html"
+                os.remove("des_" + conf.BBDD + "_" + dt_string + ".md")
+            else:
+                print "Information for Describe db in file " + "des_" + conf.BBDD + "_" + dt_string + ".md"
             sys.exit()
 
         except ImportError, e:
@@ -797,7 +814,7 @@ if __name__ == '__main__':
             ft.write(recom.recom_func_table_bloat()+"\n")
             ft.write(recom.recom_func_index_bloat() + "\n")
             ft.write(recom.recom_func_frozen()+"\n")
-            ft.write(recom.recom_ddl_CompileTime_RunTime_Checks_plpgsql()+"\n")
+            ft.write(recom.recom_ddl_compiletime_runtime_checks_plpgsql()+"\n")
 
             ft.close()
 
@@ -819,7 +836,24 @@ if __name__ == '__main__':
             os.remove("recom_t2_.txt")
             os.remove("recom_t1_.txt")
 
-            print "Information for recommendation in file "+"recom_"+conf.BBDD+"_"+dt_string+".md"
+            if args.output=='html':
+                html = markdown.markdownFromFile(input="recom_" + conf.BBDD + "_" + dt_string + ".md",
+                                                 output="recom_" + conf.BBDD + "_" + dt_string + ".html",
+                                                 extensions=['markdown.extensions.tables'])
+                file = open("recom_" + conf.BBDD + "_" + dt_string + ".html")
+                contents = file.read()
+                file.close()
+                replaced_contents = contents.replace('<table>', '<table border=1>')
+                os.remove("recom_" + conf.BBDD + "_" + dt_string + ".html")
+                file = open("recom_" + conf.BBDD + "_" + dt_string + ".html", "w+")
+                file.write(replaced_contents)
+                file.close()
+                print "Information for Describe db in file " + "recom_" + conf.BBDD + "_" + dt_string + ".html"
+                os.remove("recom_" + conf.BBDD + "_" + dt_string + ".md")
+            else:
+                print "Information for Recommendation in file "+"recom_"+conf.BBDD+"_"+dt_string+".md"
+
+
             sys.exit()
 
         except ImportError, e:

@@ -75,7 +75,7 @@ class recom(object):
         if len(dat) > 0 :
             r = "\n\n" + '**Must check the following conextion in pg_stat_activity, they are in idle in transaction** <a name="idle_intx"></a> '+"\n\n"
             self.toc.append('    * [Idle in transactions](#idle_intx)')
-            r = r + "pid | from | query | since "
+            r = r + "Pid | From | Query | Since "
             r = r + "\n" + "--- | --- |--- | ---"
             for d in dat:
 
@@ -106,7 +106,7 @@ class recom(object):
         if len(dat) > 0:
             r = "\n\n" + '**Must check the following tables without Primary Key** <a name="nopk"></a>'+"\n\n"
             self.toc.append('    * [Tables without Primary Key](#nopk)')
-            r = r + "Schena | Table "
+            r = r + "Schema | Table "
             r = r + "\n" + "--- | --- "
             for d in dat:
 
@@ -127,7 +127,7 @@ class recom(object):
         if len(dat) > 0:
             r = "\n\n" + '**Must check the following foreigns keys, probably need an index** <a name="fknoindex"></a>'+"\n\n"
             self.toc.append('    * [Foreigns key without index](#fknoindex)')
-            r = r + "Table | Column  | foreign key  | Referenced_table "
+            r = r + "Table | Column  | Foreign key  | Referenced_table "
             r = r + "\n" + "--- | --- | --- | --- "
             for d in dat:
 
@@ -143,7 +143,7 @@ class recom(object):
         if len(dat) > 0:
             r = "\n\n" + '**Must check the following indexes, never used** <a name="unindex"></a>'+"\n\n"
             self.toc.append('    * [Indexes unused](#unindex)')
-            r = r + "Table | index "
+            r = r + "Table | Index "
             r = r + "\n" + "--- | --- "
             for d in dat:
 
@@ -159,7 +159,7 @@ class recom(object):
         if len(dat) > 0:
             r = "\n\n" + '**Must check the following indexes, are invalid** <a name="invalidndex"></a>'+"\n\n"
             self.toc.append('    * [Indexes invalid](#invalidndex)')
-            r = r + "Schena | index "
+            r = r + "Schema | Index "
             r = r + "\n" + "--- | --- "
             for d in dat:
 
@@ -257,7 +257,7 @@ class recom(object):
         if len(dat) > 0:
             r = "\n\n" +'**Must check the following tables,  posible bloat, consider VACUUM full ** <a name="tablebloat"></a>'+"\n\n"
             self.toc.append('    * [Tables bloat to consider VACUUM full](#tablebloat)')
-            r = r + "Table | bloat ratio   "
+            r = r + "Table | Bloat Ratio   "
             r = r + "\n" + "--- | --- "
             for d in dat:
 
@@ -374,7 +374,7 @@ class recom(object):
         if len(dat) > 0:
             r = "\n\n" +'**Must check the following indexes, posible bloat, consider REINDEX  ** <a name="indexbloat"></a>'+"\n\n"
             self.toc.append('    * [Tables bloat to consider REINDEX](#indexbloat)')
-            r = r + "Table | IDX | idx_size | bloat ratio   "
+            r = r + "Table | Idx | Idx_Size | Bloat Ratio   "
             r = r + "\n" + "--- | --- | --- | --- "
             for d in dat:
 
@@ -390,7 +390,7 @@ class recom(object):
         if dat[0][0] > 90:
             r = "\n\n" +'**Must consider execute vacuum freeze**  <a name="freeze"></a> '+"\n\n"
             self.toc.append('    * [Tables bloat to consider vaccum full](#freeze)')
-            r = r + "\n" + "percent or TXID age : " + str(dat[0][0])
+            r = r + "\n" + "Percent or TXID age : " + str(dat[0][0])
             return r+"\n\n"
 
         return ""

@@ -64,7 +64,7 @@ class recom(object):
         dat = self.con.executequery(" SELECT  blks_hit * 100 / (blks_read + blks_hit) as BUFFER FROM pg_stat_database where datname='"+conf.BBDD+"'  and blks_read + blks_hit<>0; ")
         if dat[0][0] < conf.sb_umbral:
             r = "\n\n" + '**Must consider more shared_buffer** <a name="sha_b"></a> '+"\n\n"
-            self.toc.append('    * [shared buffers](#sha_b)')
+            self.toc.append('    * [Shared buffers](#sha_b)')
             return r+"\n\n"
 
         return ""
@@ -74,7 +74,7 @@ class recom(object):
 
         if len(dat) > 0 :
             r = "\n\n" + '**Must check the following conextion in pg_stat_activity, they are in idle in transaction** <a name="idle_intx"></a> '+"\n\n"
-            self.toc.append('    * [idle in transactions](#idle_intx)')
+            self.toc.append('    * [Idle in transactions](#idle_intx)')
             r = r + "pid | from | query | since "
             r = r + "\n" + "--- | --- |--- | ---"
             for d in dat:
@@ -87,8 +87,8 @@ class recom(object):
         dat = self.con.executequery(" SELECT column_name, string_agg (table_name,',') FROM information_schema.columns  WHERE table_schema not in ('information_schema','pg_catalog') and column_name in (select word from pg_get_keywords()) group by 1")
 
         if len(dat) > 0:
-            r = "\n\n" + '**Must check name attribute of this table, they use keyword on attributes** <a name="key"></a>'+"\n\n"
-            self.toc.append('    * [attributes with keywords](#key)')
+            r = "\n\n" + '**Must check  attributes name of these tables, they use keyword on attributes** <a name="key"></a>'+"\n\n"
+            self.toc.append('    * [Attributes with keywords](#key)')
             r = r + "Column | Tables "
             r = r + "\n" + "--- | --- "
             for d in dat:
@@ -105,7 +105,7 @@ class recom(object):
 
         if len(dat) > 0:
             r = "\n\n" + '**Must check the following table without Primary Key** <a name="nopk"></a>'+"\n\n"
-            self.toc.append('    * [tables without Primary Key](#nopk)')
+            self.toc.append('    * [Tables without Primary Key](#nopk)')
             r = r + "Schena | Table "
             r = r + "\n" + "--- | --- "
             for d in dat:
@@ -125,8 +125,8 @@ class recom(object):
             "  AND c.contype = 'f' GROUP BY c.conrelid, c.conname, c.confrelid ORDER BY pg_catalog.pg_relation_size(c.conrelid) DESC;")
 
         if len(dat) > 0:
-            r = "\n\n" + '**Must check the following foreign key, probably need an index** <a name="fknoindex"></a>'+"\n\n"
-            self.toc.append('    * [foreign key without index](#fknoindex)')
+            r = "\n\n" + '**Must check the following foreigns keys, probably need an index** <a name="fknoindex"></a>'+"\n\n"
+            self.toc.append('    * [Foreign key without index](#fknoindex)')
             r = r + "Table | Column  | foreign key  | Referenced_table "
             r = r + "\n" + "--- | --- | --- | --- "
             for d in dat:
@@ -141,8 +141,8 @@ class recom(object):
         dat = self.con.executequery( "SELECT    schemaname || '.' || relname    tab, indexrelname FROM pg_stat_user_indexes WHERE idx_scan = 0 ")
 
         if len(dat) > 0:
-            r = "\n\n" + '**Must check the following index, never used** <a name="unindex"></a>'+"\n\n"
-            self.toc.append('    * [index unused](#unindex)')
+            r = "\n\n" + '**Must check the following indexs, never used** <a name="unindex"></a>'+"\n\n"
+            self.toc.append('    * [Index unused](#unindex)')
             r = r + "Table | index "
             r = r + "\n" + "--- | --- "
             for d in dat:
@@ -157,8 +157,8 @@ class recom(object):
                                      "       i.indexrelid = c.oid AND c.relnamespace = n.oid AND     n.nspname != 'pg_catalog' AND   n.nspname != 'information_schema' AND   n.nspname != 'pg_toast' ")
 
         if len(dat) > 0:
-            r = "\n\n" + '**Must check the following index, are invalid** <a name="invalidndex"></a>'+"\n\n"
-            self.toc.append('    * [index invalid](#invalidndex)')
+            r = "\n\n" + '**Must check the following indexs, are invalid** <a name="invalidndex"></a>'+"\n\n"
+            self.toc.append('    * [Index invalid](#invalidndex)')
             r = r + "Schena | index "
             r = r + "\n" + "--- | --- "
             for d in dat:
@@ -175,7 +175,7 @@ class recom(object):
 
         if len(dat) > 0:
             r = "\n\n" +'**Must check the following table with 0 or 1 column, ** <a name="tablecol"></a> '+"\n\n"
-            self.toc.append('    * [table with 0 or 1 column](#tablecol)')
+            self.toc.append('    * [Table with 0 or 1 column](#tablecol)')
             r = r + "Table | Columns count  "
             r = r + "\n" + "--- | --- "
             for d in dat:
@@ -188,8 +188,8 @@ class recom(object):
         dat = self.con.executequery("select  table_schema||'.'||table_name tab, column_name from information_schema.columns WHERE table_schema not in ('information_schema','pg_catalog') and data_type='money'")
 
         if len(dat) > 0:
-            r = "\n\n" +'**Must check the following table with money data type column ** <a name="tablecol"></a>'+"\n\n"
-            self.toc.append('    * [table with colunm with money data type](#tablecol)')
+            r = "\n\n" +'**Must check the following tables with money data type column ** <a name="tablecol"></a>'+"\n\n"
+            self.toc.append('    * [Table with colunm with money data type](#tablecol)')
             r = r + "Table | Columns   "
             r = r + "\n" + "--- | --- "
             for d in dat:
@@ -235,7 +235,7 @@ class recom(object):
                     CASE WHEN version()~'mingw32' OR version()~'64-bit|x86_64|ppc64|ia64|amd64' THEN 8 ELSE 4 END AS ma,
                     24 AS page_hdr,
                     23 + CASE WHEN MAX(coalesce(null_frac,0)) > 0 THEN ( 7 + count(*) ) / 8 ELSE 0::int END
-                      + CASE WHEN tbl.relhasoids THEN 4 ELSE 0 END AS tpl_hdr_size,
+                     AS tpl_hdr_size,
                     sum( (1-coalesce(s.null_frac, 0)) * coalesce(s.avg_width, 1024) ) AS tpl_data_size,
                     bool_or(att.atttypid = 'pg_catalog.name'::regtype)
                       OR count(att.attname) <> count(s.attname) AS is_na
@@ -247,16 +247,16 @@ class recom(object):
                     LEFT JOIN pg_class AS toast ON tbl.reltoastrelid = toast.oid
                   WHERE att.attnum > 0 AND NOT att.attisdropped
                     AND tbl.relkind = 'r'
-                  GROUP BY 1,2,3,4,5,6,7,8,9,10, tbl.relhasoids
+                  GROUP BY 1,2,3,4,5,6,7,8,9,10
                   ORDER BY 2,3
                 ) AS s
               ) AS s2
             ) AS s3)
-            select schemaname||'.'||tblname tab,round(extra_ratio::numeric,2) from sub where extra_ratio>30 order by 2 desc """)
+            select schemaname||'.'||tblname tab,round(extra_ratio::numeric,2) from sub where extra_ratio>30 order by 2 desc  """)
 
         if len(dat) > 0:
-            r = "\n\n" +'**Must check the following table posible bloat, consider VACUUM full ** <a name="tablebloat"></a>'+"\n\n"
-            self.toc.append('    * [table bloat to consider VACUUM full](#tablebloat)')
+            r = "\n\n" +'**Must check the following tables,  posible bloat, consider VACUUM full ** <a name="tablebloat"></a>'+"\n\n"
+            self.toc.append('    * [Table bloat to consider VACUUM full](#tablebloat)')
             r = r + "Table | bloat ratio   "
             r = r + "\n" + "--- | --- "
             for d in dat:
@@ -372,8 +372,8 @@ class recom(object):
          """)
 
         if len(dat) > 0:
-            r = "\n\n" +'**Must check the following INDEX posible bloat, consider REINDEX  ** <a name="indexbloat"></a>'+"\n\n"
-            self.toc.append('    * [table bloat to consider REINDEX](#indexbloat)')
+            r = "\n\n" +'**Must check the following indexs, posible bloat, consider REINDEX  ** <a name="indexbloat"></a>'+"\n\n"
+            self.toc.append('    * [Table bloat to consider REINDEX](#indexbloat)')
             r = r + "Table | IDX | idx_size | bloat ratio   "
             r = r + "\n" + "--- | --- | --- | --- "
             for d in dat:
@@ -389,7 +389,7 @@ class recom(object):
         dat = self.con.executequery("select round(((age(datfrozenxid)::numeric*100)/current_setting('autovacuum_freeze_max_age')::numeric ),4) from pg_database where datname = '"+conf.BBDD+"'")
         if dat[0][0] > 90:
             r = "\n\n" +'**Must consider execute vacuum freeze**  <a name="freeze"></a> '+"\n\n"
-            self.toc.append('    * [table bloat to consider vaccum full](#freeze)')
+            self.toc.append('    * [Table bloat to consider vaccum full](#freeze)')
             r = r + "\n" + "percent or TXID age : " + str(dat[0][0])
             return r+"\n\n"
 
@@ -415,8 +415,8 @@ class recom(object):
             temp_con.disconect()
 
         if len(pl)>0:
-            r = "\n\n" +'**Must consider check the following warning  plpgsql function code**  <a name="pl"></a> '+"\n\n"
-            self.toc.append('    * [warning  plpgsql function code](#pl)')
+            r = "\n\n" +'**Must consider check the following warnings  plpgsql function code**  <a name="pl"></a> '+"\n\n"
+            self.toc.append('    * [Warning  plpgsql function code](#pl)')
             r = r + "Function | Warning   "
             r = r + "\n" + "--- | --- "
             for p in pl:
@@ -439,7 +439,7 @@ class descr(object):
         try:
             return databasepg(conf.PASS, conf.SERVERP, conf.BBDD, conf.USERP, conf.PORTP)
         except ImportError, e:
-            print "Error al conectar  ala BD:", str(e)
+            print "Error to connect  BD:", str(e)
 
     def conex(self):
         self.con = self.connect_db()
@@ -567,7 +567,7 @@ class descr(object):
     def descr_schema_per(self):
         dat = self.con.executequery("select nspname,pg_catalog.pg_get_userbyid(nspowner) ,coalesce(replace (replace (nspacl::text,'{',''),'}','' ),'')from pg_namespace where nspname not like 'pg_%'  and nspname <>'information_schema';  ;")
         if len(dat) > 0:
-            r = '**Schema Permissions** <a name="scheper"></a> ' + "\n\n"
+            r = '**Schemas Permissions** <a name="scheper"></a> ' + "\n\n"
             self.toc.append('    * [Schema Permissions](#scheper)')
             r = r + "Schema | Owner | Permissions"
             r = r + "\n" + "--- | --- | ---"
@@ -581,7 +581,7 @@ class descr(object):
     def descr_table_per(self):
         dat = self.con.executequery("select grantee usr,table_schema||'.'||table_name as tab, string_agg(privilege_type,',') perm from information_schema.table_privileges where table_schema<> 'pg_catalog' and table_schema<>'information_schema'   group by 1,2 order by 1;")
         if len(dat) > 0:
-            r = '**Table Permissions** <a name="tableper"></a> ' + "\n\n"
+            r = '**Tables Permissions** <a name="tableper"></a> ' + "\n\n"
             self.toc.append('    * [Table Permissions](#tableper)')
             r = r + "Usr | Tab | Permissions"
             r = r + "\n" + "--- | --- | ---"
@@ -614,7 +614,7 @@ class descr(object):
                     select foreign_table_name "table", count(*) count_of_fk_to_table, string_agg(table_name,',') tables_with_fk_to_table from sub 
                     group by 1 order by 2 desc limit 5 """)
         if len(dat) > 0:
-            r = '**Most Referenced Tables** <a name="mostfk"></a> ' + "\n\n"
+            r = '**Most Referenced tables** <a name="mostfk"></a> ' + "\n\n"
             self.toc.append('    * [Most Referenced Tables](#mostfk)')
             r = r + "Table | Count | References by table "
             r = r + "\n" + "--- | --- | ---"
@@ -629,7 +629,7 @@ class descr(object):
 		 pg_stat_user_tables psat ON (pg.relname = psat.relname)
 		join pg_namespace a on ( pg.relnamespace = a.oid)  join pg_namespace ns  on (pg.relnamespace = ns.oid) order by 2 desc limit 5""")
         if len(dat) > 0:
-            r = '**Heaviest Tables** <a name="tabsize"></a> ' + "\n\n"
+            r = '**Heaviest tables** <a name="tabsize"></a> ' + "\n\n"
             self.toc.append('    * [Heaviest Tables](#tabsize)')
             r = r + "Table | Size MB "
             r = r + "\n" + "--- | ---"

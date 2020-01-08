@@ -2,7 +2,7 @@
 pgrx
 -------------------------
 
-pgrx is an app to generate reports in markdown/HTML format about some recommendations and can obteain general descriptions from  Postgres database, this app uses some mix queries from the postgres catalog that can help to detect some possible problem and anomalies related to database performance, design and security.
+pgrx is an app to generate reports in markdown/HTML format about some recommendations and can obtain general descriptions from  Postgres database, this app uses some mix queries from the postgres catalog that can help to detect some possible problem and anomalies related to database performance, design and security.
 
 
 

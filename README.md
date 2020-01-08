@@ -1,7 +1,7 @@
 pgrx
 -------------------------
 
-pgrx is an app to generate reports in markdown format about some recommendations and can obtain general descriptions from  PostgreSQL database, this app uses some mixed queries from the postgres catalog that can help to detect some possible problems and anomalies related to database performance, design and security.
+pgrx is an app to generate reports in markdown format about some recommendations and can obteain general descriptions from  Postgres database, this app uses some mix queries from the postgres catalog that can help to detect some possible problem and anomalies related to database performance, design and security.
 
 
 
@@ -11,21 +11,20 @@ Requirements and Usage
 **Requirements**
 
 * App and lib:
-	* python 2.x
-	* python->psycopg2 (pip install psycopg2)
-	* python->markdown (pip install markdown)
-	* Tested whit 10+ (with previous versions can execute but are not yet tested )
+   1-    python 2.x
+   2-    psycopg2
+   2-    Tested whit 10+ (with previous versions can execute but are not yet tested )
    
 
 
 
 * The following OS are supported:
-	* Linux (modern RHEL/CentOS or Debian/Ubuntu; others are not yet tested);
+  1- Linux (modern RHEL/CentOS or Debian/Ubuntu; others are not yet tested);
 
 
 **Usage**
 
-**Example of Use**
+Example of Use
 
 Download from  https://github.com/asotolongo/pgrx
 
@@ -33,7 +32,7 @@ Download from  https://github.com/asotolongo/pgrx
 cd pgrx
 python pgrx.py --help
 usage: pgrx [-h] -a ACTION [-U USER] [-d DB] [-H HOST] [-p PORT] [-P PASSW]
-            [-o OUTPUT] [--version]
+            [--version]
 
 Script for get Descriptions, Recommendations and health index about PostgreSQL
 database
@@ -46,8 +45,6 @@ optional arguments:
   -H HOST     Host for connect to PostgreSQL (default: localhost)
   -p PORT     Port for connect to PostgreSQL (default: 5432)
   -P PASSW    Password for connect to PostgreSQL
-  -o OUTPUT   Output format report values (md->markdown, html->html),
-              (default: md)
   --version   show program's version number and exit
 
 required named arguments:
@@ -80,7 +77,17 @@ Information for Describe db in file des_dell_test_2019-12-26_11-10-21.md
 
 ```
 
-If don't want to pass the password in -P option, yo can edit util/config.py file and change PASS variable for the password, and ignore the -P option
+
+**Docker**
+
+- Enter to docker folder 
+ cd docker
+- Build the docker image
+docker build -t my-pgrx .
+- Test pgrx
+docker run -it --rm --name my-pgrx-app my-pgrx
+- Run pgrx
+docker run -it --rm --name my-pgrx-app -v "$PWD":/app my-pgrx python pgrx.py -a recom -H IP -d your_database -P yourpass -o html
 
 
 **IMPORTANT:** 

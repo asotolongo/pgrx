@@ -2,7 +2,7 @@
 pgrx
 -------------------------
 
-pgrx is an app to generate reports in markdown format about some recommendations and can obteain general descriptions from  Postgres database, this app uses some mix queries from the postgres catalog that can help to detect some possible problem and anomalies related to database performance, design and security.
+pgrx is an app to generate reports in markdown/HTML format about some recommendations and can obteain general descriptions from  Postgres database, this app uses some mix queries from the postgres catalog that can help to detect some possible problem and anomalies related to database performance, design and security.
 
 
 
@@ -36,9 +36,9 @@ Download from  https://github.com/asotolongo/pgrx
 cd pgrx
 python pgrx.py --help
 usage: pgrx [-h] -a ACTION [-U USER] [-d DB] [-H HOST] [-p PORT] [-P PASSW]
-            [--version]
+            [-o OUTPUT] [--version]
 
-Script for get Descriptions, Recommendations and health index about PostgreSQL
+Script for get Descriptions, Recommendations and Descriptions about PostgreSQL
 database
 
 optional arguments:
@@ -49,10 +49,13 @@ optional arguments:
   -H HOST     Host for connect to PostgreSQL (default: localhost)
   -p PORT     Port for connect to PostgreSQL (default: 5432)
   -P PASSW    Password for connect to PostgreSQL
+  -o OUTPUT   Output format report values (md->markdown, html->html),
+              (default: md)
   --version   show program's version number and exit
 
 required named arguments:
   -a ACTION   The action to execute by the app allowed values descr and recom
+
 
 
 

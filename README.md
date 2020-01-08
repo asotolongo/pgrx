@@ -1,3 +1,4 @@
+
 pgrx
 -------------------------
 
@@ -11,9 +12,12 @@ Requirements and Usage
 **Requirements**
 
 * App and lib:
-   1-    python 2.x
-   2-    psycopg2
-   2-    Tested whit 10+ (with previous versions can execute but are not yet tested )
+
+   1-:    python 2.x
+   
+   2-:    psycopg2
+   
+   3-:    Tested whit 10+ (with previous versions can execute but are not yet tested )
    
 
 

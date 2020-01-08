@@ -80,13 +80,13 @@ Information for Describe db in file des_dell_test_2019-12-26_11-10-21.md
 
 **Docker**
 
-- Enter to docker folder 
+- Enter to docker folder:
  cd docker
-- Build the docker image
+- Build the docker image:
 docker build -t my-pgrx .
-- Test pgrx
+- Test pgrx:
 docker run -it --rm --name my-pgrx-app my-pgrx
-- Run pgrx
+- Run pgrx:
 docker run -it --rm --name my-pgrx-app -v "$PWD":/app my-pgrx python pgrx.py -a recom -H IP -d your_database -P yourpass -o html
 
 

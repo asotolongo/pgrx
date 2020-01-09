@@ -15,7 +15,7 @@ Requirements and Usage
 
    1-:    python 2.x
    
-   2-:    psycopg2
+   2-:    python (psycopg2,markdown)
    
    3-:    Tested whit 10+ (with previous versions can execute but are not yet tested )
    

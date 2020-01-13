@@ -366,7 +366,7 @@ class recom(object):
         ) AS relation_stats
         ORDER BY nspname, tblname, idxname)
         
-        select schemaname, tblname, idxname, pg_size_pretty (real_size) size ,  bloat_ratio from sub 
+        select schemaname, tblname||'->'||idxname, pg_size_pretty (real_size) size , round( bloat_ratio::numeric,2)  from sub 
         where bloat_ratio>30 and   schemaname not in  ('pg_catalog','information_schema')
         ;
          """)
@@ -374,11 +374,11 @@ class recom(object):
         if len(dat) > 0:
             r = "\n\n" +'**Must check the following indexes, posible bloat, consider REINDEX  ** <a name="indexbloat"></a>'+"\n\n"
             self.toc.append('    * [Tables bloat to consider REINDEX](#indexbloat)')
-            r = r + "Table | Idx | Idx_Size | Bloat Ratio   "
+            r = r + "Schema | Tabble->Idx | Idx_Size | Bloat Ratio   "
             r = r + "\n" + "--- | --- | --- | --- "
             for d in dat:
 
-                r = r + "\n" + str(d[0]) + " | " + str(d[1]) + str(d[2]) + " | " + str(d[3])
+                r = r + "\n" + str(d[0]) + " | " + str(d[1]) + " | " + str(d[2]) + " | " + str(d[3])
             return r+"\n\n"
         return ""
 
@@ -485,6 +485,17 @@ class descr(object):
             return r + "\n\n"
 
         return ""
+
+    def descr_owner(self):
+        dat = self.con.executequery(
+            """select usename from pg_catalog.pg_database join pg_catalog.pg_user on (datdba=usesysid)
+                where datname=current_database()""")
+
+        if len(dat) > 0 :
+            r = "\n\n" + '**Database owner** <a name="owner"></a>'
+            self.toc.append('    * [Database owner](#owner)')
+            r = r + "\n" + "Database owner  : "+str(dat[0][0])
+            return r + "\n\n"
 
     def descr_tbl(self):
         dat = self.con.executequery(
@@ -639,6 +650,47 @@ class descr(object):
 
         return ""
 
+    def descr_top_used_tab(self):
+        dat = self.con.executequery("""SELECT ns.nspname||'.'|| pg.relname as name ,COALESCE (psat.seq_scan,0)+COALESCE( psat.idx_scan,0) as used_times FROM pg_class pg JOIN pg_stat_user_tables psat ON (pg.relname = psat.relname)
+            join pg_namespace a on ( pg.relnamespace = a.oid)  join pg_namespace ns  on (pg.relnamespace = ns.oid)
+               ORDER BY 2 DESC  limit 5""")
+        if len(dat) > 0:
+            r = '**Most used tables** <a name="tabused"></a> ' + "\n\n"
+            self.toc.append('    * [Most used tables(seqscan+indescan)](#tabused)')
+            r = r + "Table | Used times "
+            r = r + "\n" + "--- | ---"
+            for d in dat:
+                r = r + "\n" + str(d[0]) + " | " + str(d[1])
+            return r + "\n\n"
+
+        return ""
+
+    def descr_top_used_index(self):
+        dat = self.con.executequery("""SELECT idstat.schemaname,idstat.relname ||'->'||indexrelname AS index_name,idstat.idx_scan AS times_used,  round((pg_relation_size(idstat.indexrelid::regclass)/1024)/1024::numeric)::text || ' MB' AS index_size
+                FROM pg_stat_user_indexes AS idstat  JOIN pg_stat_user_tables AS tabstat ON idstat.relname = tabstat.relname  ORDER BY 3 desc limit 5""")
+        if len(dat) > 0:
+            r = "\n\n" + '**Most used index**<a name="idxused"></a>' + "\n\n"
+            self.toc.append('    * [Most used index](#idxused)')
+            r = r + "Schema | Tabble->Idx | Times Used | Idx_Size   "
+            r = r + "\n" + "--- | --- | --- | --- "
+            for d in dat:
+                r = r + "\n" + str(d[0]) + " | " + str(d[1]) + " | " + str(d[2]) + " | " + str(d[3])
+            return r + "\n\n"
+        return ""
+
+        if len(dat) > 0:
+            r = '**Most Used tables** <a name="tabused"></a> ' + "\n\n"
+            self.toc.append('    * [Most Used tables(seqscan+indescan)](#tabused)')
+            r = r + "Table | Used times "
+            r = r + "\n" + "--- | ---"
+            for d in dat:
+                r = r + "\n" + str(d[0]) + " | " + str(d[1])
+            return r + "\n\n"
+
+        return ""
+
+
+
     def descr_top_dead_tup_tab(self):
         dat = self.con.executequery("""SELECT ns.nspname||'.'|| pg.relname as name , n_dead_tup  FROM pg_class pg JOIN  pg_stat_user_tables psat ON (pg.relname = psat.relname)
 		join pg_namespace a on ( pg.relnamespace = a.oid)  join pg_namespace ns  on (pg.relnamespace = ns.oid) order by 2 desc limit 5""")
@@ -664,6 +716,32 @@ class descr(object):
             r = r + "\n" + "--- | --- | --- | --- | ---"
             for d in dat:
                 r = r + "\n" + str(d[0]) + " | " + str(d[1])+ " | " + str(d[2])+ " | " + str(d[3])+ " | " + str(d[4])
+            return r + "\n\n"
+
+        return ""
+
+    def descr_latest_vaccum_tab(self):
+        dat = self.con.executequery(""" SELECT ns.nspname||'.'|| pg.relname as name ,
+      case
+        when last_autovacuum > coalesce(last_vacuum, '0001-01-01') then last_autovacuum::timestamp(0)::text
+        when last_vacuum is not null then last_vacuum::timestamp(0)::text
+        else '-'
+      end as "last_vacuumed",
+      case
+        when last_autovacuum > coalesce(last_vacuum, '0001-01-01') then 'autovacuum'
+        when last_vacuum is not null then 'manual'
+        else '-'
+      end as "vacuum type"
+              FROM pg_class pg JOIN pg_stat_user_tables psat ON (pg.relname = psat.relname)  join pg_namespace a on
+                 ( pg.relnamespace = a.oid)  join pg_namespace ns  on (pg.relnamespace = ns.oid) ORDER BY 2  desc nulls last limit 5;
+                """)
+        if len(dat) > 0:
+            r = '**Lastest vacuum tables** <a name="lastvac"></a> ' + "\n\n"
+            self.toc.append('    * [Lastest vacuum tables](#lastvac)')
+            r = r + "Table | Last vaccum | Vaccum type "
+            r = r + "\n" + "--- | --- | --- "
+            for d in dat:
+                r = r + "\n" + str(d[0]) + " | " + str(d[1])+ " | " + str(d[2])
             return r + "\n\n"
 
         return ""
@@ -723,6 +801,7 @@ if __name__ == '__main__':
 
             #
             ft.write(des.descr_version() + "\n")
+            ft.write(des.descr_owner()+ "\n")
             ft.write(des.descr_uptime() + "\n")
             ft.write(des.descr_conf() + "\n")
             ft.write(des.descr_tbl()+ "\n")
@@ -732,9 +811,12 @@ if __name__ == '__main__':
             ft.write(des.descr_schema_per()+"\n")
             ft.write(des.descr_table_per() + "\n")
             ft.write(des.descr_top_size_tab()+"\n")
+            ft.write(des.descr_top_used_tab()+"\n")
+            ft.write(des.descr_top_used_index()+"\n")
             ft.write(des.descr_top_dead_tup_tab() + "\n")
             ft.write(des.descr_top_referenced_tab()+"\n")
             ft.write(des.descr_top_vaccum_tab() + "\n")
+            ft.write(des.descr_latest_vaccum_tab()+ "\n")
 
             ft.close()
 

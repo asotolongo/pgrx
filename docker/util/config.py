@@ -5,16 +5,16 @@ PORTP   = '5432'
 USERP = 'postgres'
 PASS = ''
 
-intervalo = 10
-query_umbral = 3
-bloat_umbral = 1024
+interval = 10
+query_threshold = 3
+bloat_threshold = 1024
 
-sb_umbral = 90
-idle_in_tx_umbral = '20 sec'
-conex_umbral = 90
+sb_threshold = 90
+idle_in_tx_threshold = '20 sec'
+conex_threshold = 90
 
-valores = {
+val = {
         0: "Normal",
-        5: "Medio",
-        10: "Critico"
+        5: "Middle",
+        10: "Critical"
     }

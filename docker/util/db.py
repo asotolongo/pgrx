@@ -4,7 +4,7 @@ try:
     import  sys
     from log import log
 except ImportError,e:
-    print "Error al importar :", str(e)
+    print "importr error :", str(e)
 
 log = log('pgrx.log')
 
@@ -49,7 +49,7 @@ class databasepg(database):
             self.cursor = self.connecction.cursor()
             self.con = 1
         except Exception, e:
-            print 'Error for connect to server: ', str(e)
+            print 'Error connecting to server: ', str(e)
             log.info(str(e))
             self.con = 0
             sys.exit()

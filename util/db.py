@@ -4,7 +4,7 @@ try:
     import  sys
     from log import log
 except ImportError,e:
-    print "importr error :", str(e)
+    print "import error :", str(e)
 
 log = log('pgrx.log')
 
